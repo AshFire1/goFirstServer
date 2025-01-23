@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/AshFire1/service/cart"
+	"github.com/AshFire1/service/order"
+	"github.com/AshFire1/service/product"
 	"github.com/AshFire1/service/user"
 	"github.com/gorilla/mux"
 )
@@ -26,6 +29,13 @@ func (apiConfig *APIServer) Run() error {
 	userStore := user.NewStore(apiConfig.db)
 	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(subrouter)
+	productStore := product.NewStore(apiConfig.db)
+	productHandler := product.NewHandler(productStore)
+	productHandler.RegisterRoutes(subrouter)
+	orderStore := order.NewStore(apiConfig.db)
+
+	cartHandler := cart.NewHandler(orderStore, productStore, userStore)
+	cartHandler.RegisterRoutes(subrouter)
 	log.Printf("API server started at %s\n", apiConfig.addr)
 	return http.ListenAndServe(apiConfig.addr, router)
 }
